@@ -1,4 +1,4 @@
-var CACHE = "wordfamilies-v14";
+var CACHE = "wordfamilies-v15";
 var ASSETS = ["./", "./index.html", "./story.html", "./manifest.webmanifest", "./icon-180.png", "./icon-512.png"];
 
 self.addEventListener("install", function(e){
