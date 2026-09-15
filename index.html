@@ -449,7 +449,7 @@ var grade=store.get("grade",1);
 var fi=Math.min(store.get("fam",0),FAMS.length-1);
 var gi=store.get("grp",0);
 var deck=[], dpos=0, misses=0, score=store.get("score",0);
-var t0=0, ticker=null;
+var t0=0, ticker=null, advTimer=null;
 var pos=20;   // yards from his own goal line; the ball never goes below 20
 var famChips=[], grpChips=[];
 
@@ -544,9 +544,10 @@ function hush(){try{if(window.speechSynthesis)speechSynthesis.cancel();}catch(e)
 
 /* ---------- rounds ---------- */
 function newPractice(){
+  clearTimeout(advTimer);
   var f=FAMS[fi];
   deck=deckWords(f,ROUND);
-  pos=0; render();
+  dpos=0; render();
 }
 function drive(){
   var x=26+pos*2.48;
@@ -562,12 +563,14 @@ function gain(n){
 }
 
 function newTimed(){
+  clearTimeout(advTimer);
   deck=poolFor(ALL[gi],60); dpos=0; pos=20; misses=0; drive();
   t0=Date.now(); clearInterval(ticker); ticker=setInterval(tick,100); tick(); render();
 }
 function tick(){ E("clock").textContent=((Date.now()-t0)/1000).toFixed(1)+"s"; }
 
 function render(){
+  if(dpos>=deck.length) dpos=0;
   var c=deck[dpos];
   if(c){
     E("word").innerHTML='<span class="on">'+c.w.slice(0,c.cut)+"</span>"+c.w.slice(c.cut);
@@ -586,7 +589,8 @@ function render(){
 
 function advance(){
   render();
-  setTimeout(function(){
+  clearTimeout(advTimer);
+  advTimer=setTimeout(function(){
     if(dpos>=deck.length-1){
       if(mode==="timed"){ deck=poolFor(ALL[gi],60); dpos=0; render(); return; }
       finish(); return;
@@ -635,6 +639,7 @@ function showReady(){
 /* ---------- screens ---------- */
 function show(s){
   screen=s; hush();
+  if(s!=="play") clearTimeout(advTimer);
   if(s!=="play"){ clearInterval(ticker); }
   E("sPlay").className = s==="play"?"":"hide";
   E("sPick").className = s==="pick"?"scroll":"scroll hide";
@@ -650,7 +655,7 @@ function show(s){
 }
 
 function setMode(m){
-  hush(); clearInterval(ticker); mode=m;
+  hush(); clearInterval(ticker); clearTimeout(advTimer); mode=m;
   E("tabPractice").className = m==="practice"?"tab on":"tab";
   E("tabTimed").className = m==="timed"?"tab on":"tab";
   if(m==="practice"){ newPractice(); show("play"); }
