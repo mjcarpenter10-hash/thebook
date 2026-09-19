@@ -47,6 +47,7 @@
   .clock{font-size:26px;color:var(--quiet);min-height:32px;letter-spacing:1px}
   #word{font-size:clamp(48px,15.5vw,80px);line-height:1.15;letter-spacing:1px;cursor:pointer;word-break:break-word}
   #word .on{color:var(--onset)}
+  #word .dot2{color:var(--quiet);padding:0 2px}
   .speak{width:66px;height:66px;border-radius:50%;margin:12px auto 0;display:flex;align-items:center;
          justify-content:center;font-size:30px;color:var(--onset);border-color:#D9D2F7;background:#F1EEFC}
   #dots{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:18px}
@@ -71,8 +72,14 @@
   /* picker screens */
   .grp{font-size:15px;color:var(--quiet);margin:18px 0 8px}
   .chips{display:flex;flex-wrap:wrap;gap:10px}
-  .fam{min-height:58px;min-width:74px;font-size:22px;border-radius:16px;padding:0 16px}
+  .fam{min-height:64px;min-width:80px;font-size:22px;border-radius:16px;padding:6px 14px;display:flex;align-items:center}
   .fam.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .fam{flex-direction:column;justify-content:center;gap:1px}
+  .fp{font-size:22px} .fs{font-size:13px;color:var(--quiet)}
+  .fam.on .fs{color:#D7DBDE}
+  .fam.mix{background:#FAEEDA;border-color:#EF9F27;color:#854F0B}
+  .fam.mix .fs{color:#854F0B}
+  .fam.mix.on{background:#854F0B;color:#FAEEDA;border-color:#854F0B}
   .bigchip{width:100%;min-height:74px;font-size:26px;border-radius:18px;margin-bottom:10px}
   .bigchip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
   .grades{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:2px 0 10px}
@@ -81,7 +88,9 @@
   .gbig{font-size:19px;color:var(--ink)}
   .gsm{font-size:12px;line-height:1.3}
   .grade.on{background:var(--onset);border-color:var(--onset);color:#E6E1FB}
+  .grade.big{width:100%;min-height:66px;margin-top:10px}
   .grade.on .gbig{color:#fff}
+  .kinds.hide{display:none}
   .kinds{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:4px 0 2px}
   .kind{min-height:84px;border-radius:18px;display:flex;flex-direction:column;align-items:center;
         justify-content:center;gap:2px;padding:0 4px;color:var(--quiet)}
@@ -330,27 +339,6 @@ var ONSETS=[
   {o:"tw",w:["twin","twig","twist","twelve","twenty","twice"]}]}
 ];
 
-var GROUPS2=[
- {g:"r sounds",f:[
-  {r:"ar",w:["car","far","jar","tar","bar","star","scar","char"]},
-  {r:"ark",w:["park","dark","bark","mark","shark","spark","lark"]},
-  {r:"art",w:["part","cart","start","smart","chart","dart","tart"]},
-  {r:"orn",w:["corn","born","horn","thorn","worn","morn"]},
-  {r:"ort",w:["fort","sort","short","sport","port","snort"]},
-  {r:"irt",w:["dirt","shirt","skirt","flirt","squirt"]}]},
- {g:"vowel teams",f:[
-  {r:"aw",w:["saw","paw","law","jaw","raw","claw","draw","straw","thaw"]},
-  {r:"awn",w:["yawn","lawn","dawn","fawn","drawn","prawn"]},
-  {r:"oil",w:["boil","soil","coil","foil","spoil","broil","toil"]},
-  {r:"oy",w:["boy","toy","joy","soy","ploy"]},
-  {r:"ew",w:["new","few","chew","crew","drew","grew","blew","flew","stew","threw","screw"]},
-  {r:"own",w:["down","town","brown","clown","crown","gown","frown"]},
-  {r:"ound",w:["found","round","sound","pound","ground","hound","mound","bound"]}]},
- {g:"tricky endings",f:[
-  {r:"tch",w:["catch","match","patch","hatch","pitch","ditch","witch","switch","batch"]},
-  {r:"dge",w:["badge","ledge","judge","fudge","bridge","dodge","hedge","nudge"]}]}
-];
-
 var SIGHT=[
  {g:"sight words",lvl:1,f:[
   {s:"1st grade",w:["the","a","and","are","to","is","his","as","has","was","we","she","he","be","me","I","you","they","or","for","of","have","from","by","my","do","one"]}]},
@@ -359,26 +347,58 @@ var SIGHT=[
   {s:"3rd grade",w:["about","better","bring","carry","clean","cut","done","draw","drink","eight","fall","far","full","got","grow","hold","hot","hurt","if","keep","kind","laugh","light","long","much","myself","never","only","own","pick","seven","shall","show","six","small","start","ten","today","together","try","warm"]}]}
 ];
 
-// -ight is a grade 2 pattern; it lives with the other tricky endings
-var MOVE={"ight":"tricky endings","out":"vowel teams"};
-GROUPS.forEach(function(G){
-  G.f=G.f.filter(function(f){
-    if(!MOVE[f.r]) return true;
-    for(var i=0;i<GROUPS2.length;i++){ if(GROUPS2[i].g===MOVE[f.r]){ GROUPS2[i].f.push(f); break; } }
-    return false;
-  });
-});
-GROUPS=GROUPS.concat(GROUPS2);
-var G2NAMES={"beginning blends":1,"r sounds":1,"vowel teams":1,"tricky endings":1};
-GROUPS.forEach(function(G){G.lvl=G2NAMES[G.g]?2:1;G.f.forEach(function(f){f.t="end";f.k=f.r;f.lab="-"+f.r;});});
-ONSETS.forEach(function(G){G.lvl=G2NAMES[G.g]?2:1;G.f.forEach(function(f){f.t="start";f.k=f.o;f.lab=f.o+"-";});});
-SIGHT.forEach(function(G){G.f.forEach(function(f){f.t="sight";f.k="";f.lab=f.s;f.lvl=G.lvl;});});
-var ALL=GROUPS.concat(ONSETS).concat(SIGHT);
+var PATTERNS=[{"g":"silent e","f":[{"kind":"split","name":"a_e","sample":"cake","words":["cake","lake","make","take","bake","rake","wake","snake","shake","flake","stake","quake","game","name","same","came","tame","blame","flame","frame","shame","gate","late","date","hate","plate","skate","state","crate","cane","plane","whale","wave","save","cave","gave","brave","grape","tape","shape","grade","made","fade","shade","blade","safe","face","race","place","space"]},{"kind":"split","name":"i_e","sample":"bike","words":["bike","like","hike","spike","ride","side","hide","wide","tide","bride","slide","glide","pride","line","mine","nine","pine","vine","dine","fine","shine","spine","time","lime","dime","chime","slime","crime","prime","bite","kite","white","quite","five","dive","hive","drive","smile","mile","while","file","pile","wipe","ripe","pipe","nice","rice","mice","price","size","prize"]},{"kind":"split","name":"o_e","sample":"bone","words":["home","bone","cone","tone","stone","phone","hole","mole","pole","role","note","vote","rope","hope","nose","rose","close","those","joke","poke","woke","smoke","broke","spoke","code","rode","globe","robe","stove","drove","dome","zone"]},{"kind":"split","name":"u_e","sample":"cube","words":["cube","tube","cute","mute","flute","June","tune","dune","huge","use","fuse","rule","rude","mule","duke","costume","perfume","amuse","excuse","confuse","include","volume","refuse"]}]},{"g":"long vowel teams","f":[{"kind":"team","name":"ee","sample":"tree","words":["see","bee","tree","free","three","knee","feet","meet","sweet","street","green","seen","queen","keep","deep","sleep","sheep","steep","jeep","need","feed","seed","speed","week","cheek","creek","wheel","sweep","teeth","cheese"]},{"kind":"team","name":"ea","sample":"eat","words":["eat","meat","seat","beat","heat","neat","treat","wheat","read","bead","lead","team","dream","cream","scream","clean","mean","bean","leaf","each","teach","beach","peach","reach","sea","tea","pea","speak","steam"]},{"kind":"team","name":"ai","sample":"rain","words":["rain","main","pain","train","brain","chain","plain","grain","stain","sail","mail","nail","tail","fail","jail","trail","snail","pail","wait","paint","paid","laid","aim","claim"]},{"kind":"team","name":"ay","sample":"play","words":["day","may","say","way","play","stay","gray","tray","clay","stray","hay","lay","pay","ray","bay","spray"]},{"kind":"team","name":"oa","sample":"boat","words":["boat","coat","goat","float","throat","road","toad","load","soap","soak","oak","cloak","croak","coach","roast","toast","coast","foam","moan","groan","oat","goal","loaf","oatmeal","railroad","floating","toaster","cocoa"]},{"kind":"team","name":"ow","sample":"snow","words":["snow","blow","grow","show","slow","low","mow","row","throw","flow","glow","crow","bowl","own","grown","thrown"]},{"kind":"team","name":"igh","sample":"light","words":["light","night","right","sight","might","bright","fight","tight","flight","high","sigh","thigh","slight","fright","highway","nightlight","lightning","frightened","brightly"]}]},{"g":"other vowel teams","f":[{"kind":"team","name":"oo","sample":"moon","words":["moon","soon","noon","spoon","room","broom","zoom","boot","root","shoot","scoot","food","mood","pool","tool","cool","school","tooth","smooth","roof","goose","loose","hoop","loop","scoop","zoo","too"]},{"kind":"team","name":"oo","sample":"book","words":["book","look","took","cook","hook","shook","brook","good","hood","wood","stood","foot","wool","hoof","cookie","footprint","bookcase","woodland","crooked","rookie","cookbook","goodness","football","notebook"]},{"kind":"team","name":"ou","sample":"out","words":["out","shout","cloud","loud","proud","round","sound","found","ground","mouth","south","house","mouse","count","scout","spout","trout","couch","ouch","pound","bound","hound"]},{"kind":"team","name":"ow","sample":"cow","words":["cow","how","now","wow","owl","down","town","brown","clown","crown","gown","frown","growl","howl","plow","crowd"]},{"kind":"team","name":"oi","sample":"oil","words":["oil","boil","soil","coil","foil","spoil","broil","coin","join","joint","point","noise","voice","choice","moist","poison","noisy","pointer","boiling","avoid","appoint","moisture","rejoice"]},{"kind":"team","name":"oy","sample":"boy","words":["boy","toy","joy","soy","ploy","royal","loyal","cowboy","enjoy","annoy","destroy","oyster","voyage","joyful","employ"]},{"kind":"team","name":"aw","sample":"saw","words":["saw","paw","law","jaw","raw","claw","draw","straw","thaw","yawn","lawn","dawn","fawn","drawn","crawl","shawl","hawk","squawk","awful","lawyer","sawdust","drawing","seesaw"]},{"kind":"team","name":"au","sample":"autumn","words":["autumn","august","author","auto","haul","haunt","launch","laundry","sauce","cause","pause","because","fault","vault","applaud","astronaut","dinosaur"]},{"kind":"team","name":"ew","sample":"new","words":["new","few","chew","crew","drew","grew","blew","flew","stew","threw","screw","knew","dew","brew","news","jewel","renew","nephew","cashew","curfew","newborn","chewing"]},{"kind":"team","name":"ea","sample":"bread","words":["bread","head","dead","spread","thread","breath","sweat","deaf","meant","ready","heavy","healthy","weather","feather","leather","meadow","instead","breakfast","sweater","pleasant","heaven"]}]},{"g":"r sounds","f":[{"kind":"team","name":"ar","sample":"car","words":["car","far","jar","bar","tar","star","scar","char","park","dark","bark","mark","shark","spark","part","cart","start","smart","chart","dart","farm","harm","barn","yarn","card","hard","yard","arm","art","sharp","march"]},{"kind":"team","name":"or","sample":"corn","words":["for","corn","born","horn","thorn","worn","fort","sort","short","sport","port","snort","fork","pork","storm","north","torch","porch","more","store","score","wore","chore","shore","sore","tore"]},{"kind":"team","name":"er","sample":"her","words":["her","herd","fern","term","germ","perch","clerk","verb","after","water","sister","winter","summer","better","never","under","over","river","dinner","letter"]},{"kind":"team","name":"ir","sample":"bird","words":["bird","girl","dirt","shirt","skirt","first","third","stir","swirl","twirl","birth","thirst","chirp","firm","circle","circus","dirty","thirty","thirsty","squirrel","whirl","birthday"]},{"kind":"team","name":"ur","sample":"turn","words":["fur","turn","burn","hurt","curl","surf","church","burst","nurse","purse","curb","blur","spur","curve","purple","turkey"]}]},{"g":"consonant patterns","f":[{"kind":"team","name":"tch","sample":"catch","words":["catch","match","patch","hatch","batch","latch","pitch","ditch","witch","itch","switch","stitch","watch","notch","crutch","scratch"]},{"kind":"team","name":"dge","sample":"judge","words":["badge","ledge","hedge","judge","fudge","nudge","bridge","dodge","edge","wedge","budge","smudge","trudge","grudge","sludge","pledge","ridge","lodge","badger","dodger"]},{"kind":"silent","name":"kn wr mb","sample":"knee","words":["knee","knew","know","knot","knock","knife","write","wrap","wrong","wreck","wrist","lamb","comb","thumb","climb","crumb"]},{"kind":"team","name":"alk","sample":"walk","words":["walk","talk","chalk","stalk","sidewalk","beanstalk","walking","talking","walker"]},{"kind":"soft","name":"ce ci","sample":"city","words":["city","circle","center","cent","certain","cell","ice","rice","face","race","place","space","nice","price","dance","chance","science","pencil","fence","since","police"]},{"kind":"soft","name":"ge gi","sample":"giant","words":["giant","gem","germ","gentle","age","page","cage","huge","large","change","orange","engine","village","danger","magic","giraffe","stage","bridge"]}]},{"g":"word endings","f":[{"kind":"end","name":"le","sample":"table","words":["table","little","candle","handle","middle","bottle","uncle","apple","simple","purple","people","maple","cable","title","turtle","gentle","puzzle","bubble","jungle","pickle","giggle"]},{"kind":"end","name":"y","sample":"happy","words":["happy","silly","candy","hungry","angry","sunny","funny","penny","party","story","baby","city","body","many","puppy","lucky","noisy","sleepy","thirsty","healthy","heavy","ready","pretty"]},{"kind":"end","name":"ly","sample":"slowly","words":["slowly","quickly","quietly","loudly","safely","badly","sadly","gladly","lately","nicely","softly","kindly","suddenly","finally","carefully","happily","easily","friendly","lonely","lovely"]},{"kind":"team","name":"ful","sample":"helpful","words":["helpful","thankful","useful","careful","cheerful","colorful","peaceful","powerful","wonderful","playful","joyful","hopeful","restful","painful"]},{"kind":"end","name":"tion","sample":"question","words":["question","action","station","vacation","nation","motion","lotion","fiction","section","direction","attention","invitation","education","celebration"]}]},{"g":"two sounds","f":[{"kind":"mix","name":"ow","sample":"snow or cow","a":["snow","blow","grow","show","slow","throw","own","grown"],"b":["cow","how","now","owl","down","town","brown","clown","crown","growl"]},{"kind":"mix","name":"oo","sample":"moon or book","a":["moon","soon","spoon","room","broom","food","pool","tooth","school","zoo"],"b":["book","look","took","cook","hook","good","wood","stood","foot","wool"]},{"kind":"mix","name":"ea","sample":"eat or bread","a":["eat","meat","seat","beat","treat","clean","dream","team","leaf","beach"],"b":["bread","head","dead","spread","thread","breath","sweat","deaf"]},{"kind":"mix","name":"y","sample":"happy or cry","a":["happy","puppy","baby","funny","sunny","penny","party","story","city","candy"],"b":["cry","try","fly","sky","dry","my","by","shy","why","spy"]},{"kind":"mix","name":"c","sample":"cat or city","a":["cat","cup","cold","cake","corn","club"],"b":["city","cent","circle","ice","race","place"]},{"kind":"mix","name":"g","sample":"gate or giant","a":["gate","got","gum","green","goat","flag"],"b":["giant","gem","cage","page","huge","magic"]}]}];
 
+var BIG=[{"name":"two words glued together","sample":"sunshine","words":[{"w":"sunshine","c":[3,5]},{"w":"sunlight","c":[3,5]},{"w":"bedroom","c":[3,4]},{"w":"birthday","c":[5,3]},{"w":"sidewalk","c":[4,4]},{"w":"popcorn","c":[3,4]},{"w":"notebook","c":[4,4]},{"w":"football","c":[4,4]},{"w":"baseball","c":[4,4]},{"w":"rainbow","c":[4,3]},{"w":"raincoat","c":[4,4]},{"w":"butterfly","c":[6,3]},{"w":"campfire","c":[4,4]},{"w":"fireplace","c":[4,5]},{"w":"toothbrush","c":[5,5]},{"w":"hairbrush","c":[4,5]},{"w":"backpack","c":[4,4]},{"w":"backyard","c":[4,4]},{"w":"bathtub","c":[4,3]},{"w":"cupcake","c":[3,4]},{"w":"pancake","c":[3,4]},{"w":"strawberry","c":[5,5]},{"w":"blueberry","c":[4,5]},{"w":"playground","c":[4,6]},{"w":"classroom","c":[5,4]},{"w":"newspaper","c":[4,5]},{"w":"waterfall","c":[5,4]},{"w":"snowman","c":[4,3]},{"w":"snowball","c":[4,4]},{"w":"weekend","c":[4,3]},{"w":"afternoon","c":[5,4]},{"w":"herself","c":[3,4]},{"w":"himself","c":[3,4]},{"w":"myself","c":[2,4]},{"w":"inside","c":[2,4]},{"w":"outside","c":[3,4]},{"w":"upon","c":[2,2]},{"w":"something","c":[4,5]},{"w":"anything","c":[3,5]},{"w":"everything","c":[5,5]},{"w":"railroad","c":[4,4]},{"w":"doorbell","c":[4,4]},{"w":"cookbook","c":[4,4]},{"w":"workbook","c":[4,4]},{"w":"hotdog","c":[3,3]},{"w":"mailbox","c":[4,3]},{"w":"treehouse","c":[4,5]},{"w":"doghouse","c":[3,5]},{"w":"lunchbox","c":[5,3]}]},{"name":"two chunks, neither a word","sample":"rabbit","words":[{"w":"rabbit","c":[3,3]},{"w":"kitten","c":[3,3]},{"w":"button","c":[3,3]},{"w":"butter","c":[3,3]},{"w":"letter","c":[3,3]},{"w":"dinner","c":[3,3]},{"w":"summer","c":[3,3]},{"w":"winter","c":[3,3]},{"w":"happen","c":[3,3]},{"w":"basket","c":[3,3]},{"w":"pencil","c":[3,3]},{"w":"napkin","c":[3,3]},{"w":"muffin","c":[3,3]},{"w":"puzzle","c":[3,3]},{"w":"cattle","c":[3,3]},{"w":"bottom","c":[3,3]},{"w":"bottle","c":[3,3]},{"w":"candle","c":[3,3]},{"w":"handle","c":[3,3]},{"w":"middle","c":[3,3]},{"w":"until","c":[2,3]},{"w":"under","c":[2,3]},{"w":"after","c":[2,3]},{"w":"often","c":[2,3]},{"w":"problem","c":[4,3]},{"w":"picnic","c":[3,3]},{"w":"ticket","c":[4,2]},{"w":"pocket","c":[4,2]},{"w":"rocket","c":[4,2]},{"w":"jacket","c":[4,2]},{"w":"bucket","c":[4,2]},{"w":"garden","c":[3,3]},{"w":"market","c":[3,3]},{"w":"corner","c":[3,3]},{"w":"harvest","c":[3,4]},{"w":"sudden","c":[3,3]},{"w":"mitten","c":[3,3]},{"w":"ribbon","c":[3,3]},{"w":"lesson","c":[3,3]},{"w":"tunnel","c":[3,3]},{"w":"helmet","c":[3,3]},{"w":"velvet","c":[3,3]},{"w":"silver","c":[3,3]},{"w":"river","c":[3,2]},{"w":"never","c":[3,2]},{"w":"ever","c":[2,2]},{"w":"seven","c":[3,2]},{"w":"golden","c":[3,3]}]},{"name":"two patterns in one word","sample":"rainbow","words":[{"w":"rainbow","c":[4,3]},{"w":"birthday","c":[5,3]},{"w":"teacher","c":[5,2]},{"w":"flower","c":[4,2]},{"w":"thirsty","c":[6,1]},{"w":"sleepy","c":[5,1]},{"w":"needle","c":[4,2]},{"w":"powder","c":[3,3]},{"w":"shower","c":[4,2]},{"w":"counter","c":[4,3]},{"w":"power","c":[3,2]},{"w":"tower","c":[3,2]},{"w":"brighter","c":[6,2]},{"w":"sweeter","c":[5,2]},{"w":"cleaner","c":[5,2]},{"w":"dreamer","c":[5,2]},{"w":"reader","c":[4,2]},{"w":"cooler","c":[4,2]},{"w":"painter","c":[5,2]},{"w":"sailor","c":[4,2]},{"w":"tailor","c":[4,2]},{"w":"toaster","c":[5,2]},{"w":"roaster","c":[5,2]},{"w":"speaker","c":[5,2]},{"w":"streetcar","c":[6,3]},{"w":"daylight","c":[3,5]},{"w":"highway","c":[4,3]},{"w":"moonlight","c":[4,5]},{"w":"nighttime","c":[5,4]},{"w":"seaweed","c":[3,4]}]},{"name":"three chunks","sample":"butterfly","words":[{"w":"butterfly","c":[3,3,3]},{"w":"elephant","c":[2,1,5]},{"w":"wonderful","c":[3,3,3]},{"w":"suddenly","c":[3,3,2]},{"w":"family","c":[3,1,2]},{"w":"hospital","c":[3,2,3]},{"w":"umbrella","c":[2,4,2]},{"w":"vacation","c":[3,1,4]},{"w":"dinosaur","c":[2,2,4]},{"w":"tomato","c":[2,2,2]},{"w":"potato","c":[2,2,2]},{"w":"banana","c":[2,2,2]},{"w":"animal","c":[2,1,3]},{"w":"holiday","c":[3,1,3]},{"w":"beautiful","c":[4,2,3]},{"w":"carefully","c":[4,3,2]},{"w":"seventeen","c":[3,2,4]},{"w":"newspaper","c":[4,2,3]},{"w":"grandfather","c":[5,2,4]},{"w":"grandmother","c":[5,4,2]},{"w":"yesterday","c":[3,3,3]},{"w":"together","c":[2,4,2]},{"w":"chocolate","c":[4,1,4]},{"w":"buttercup","c":[3,3,3]},{"w":"understand","c":[2,3,5]},{"w":"afternoon","c":[2,3,4]}]}];
+
+// tier 1: the rime and digraph sets he finished
+var G2NAMES={"beginning blends":1};
+GROUPS.forEach(function(G){G.tier=1;G.f.forEach(function(f){f.t="end";f.k=f.r;f.lab="-"+f.r;});});
+ONSETS.forEach(function(G){G.tier=1;G.f.forEach(function(f){f.t="start";f.k=f.o;f.lab=f.o+"-";});});
+SIGHT.forEach(function(G){G.tier=(G.lvl===1?1:2);G.f.forEach(function(f){f.t="sight";f.k="";f.lab=f.s;});});
+
+// tier 2: the phonics patterns
+PATTERNS.forEach(function(G){G.tier=2;G.f.forEach(function(f){
+  f.t=f.kind; f.k=f.name; f.lab=f.name; f.w=f.words||f.a.concat(f.b);
+});});
+
+// tier 3: longer words split into chunks
+var BIGG=[{g:"big words",tier:3,f:BIG.map(function(s){
+  return {t:"big", k:s.name, lab:s.sample, sample:s.sample, name:s.name,
+          w:s.words.map(function(x){return x.w;}), chunks:s.words};
+})}];
+
+var ALL=GROUPS.concat(ONSETS).concat(PATTERNS).concat(SIGHT).concat(BIGG);
 var FAMS=[];
-ALL.forEach(function(G,gi){G.f.forEach(function(f){f.idx=FAMS.length;f.gi=gi;FAMS.push(f);});});
+ALL.forEach(function(G,gi){G.f.forEach(function(f){f.idx=FAMS.length;f.gi=gi;f.tier=G.tier;FAMS.push(f);});});
+var CHUNK={};
+BIG.forEach(function(s){ s.words.forEach(function(x){ CHUNK[x.w]=x.c; }); });
 function famKey(f){ return f.t+":"+f.lab; }
-function mk(f,w){ return {w:w, cut:(f.t==="end"? w.length-f.k.length : f.k.length), state:0, key:famKey(f)}; }
+function maskOf(f,w){
+  var m=[], i, at;
+  if(f.t==="end"){ for(i=w.length-f.k.length;i<w.length;i++) m.push(i); }
+  else if(f.t==="start"){ for(i=0;i<f.k.length;i++) m.push(i); }
+  else if(f.t==="split"){
+    at=w.search(new RegExp(f.k.charAt(0)+"[bcdfghjklmnpqrstvwxyz]+e$"));
+    if(at>=0){ m.push(at); m.push(w.length-1); }
+  }
+  else if(f.t==="silent"){
+    if(w.indexOf("kn")===0||w.indexOf("wr")===0){ m.push(0); m.push(1); }
+    else if(w.slice(-2)==="mb"){ m.push(w.length-2); m.push(w.length-1); }
+  }
+  else if(f.t==="soft"){
+    at=w.search(new RegExp(f.k.charAt(0)+"[eiy]"));
+    if(at>=0){ m.push(at); m.push(at+1); }
+  }
+  else if(f.t==="suffix"){ for(i=w.length-f.k.length;i<w.length;i++) m.push(i); }
+  else if(f.t==="team"||f.t==="mix"){
+    at=w.indexOf(f.k);
+    if(at<0&&f.k.length===1) at=w.lastIndexOf(f.k);
+    if(at>=0) for(i=0;i<f.k.length;i++) m.push(at+i);
+  }
+  return m;
+}
+function mk(f,w){ return {w:w, mask:maskOf(f,w), chunks:(f.t==="big"?CHUNK[w]:null), state:0, key:famKey(f)}; }
 
 // how often each word has been shown, so fresh words come up more often.
 // loaded lazily: store is defined further down the file
@@ -402,39 +422,19 @@ function drawWeighted(cands,n){
   return out;
 }
 
-var SIMPLE=/^(ch|sh|th|wh|qu)$/;
-// grade 1 = one consonant (or a simple digraph) at the front, and a short word
-function wlvl(f,w){
-  if(f.t==="sight") return f.lvl;
-  if(f.t==="start") return (SIMPLE.test(f.k) && w.length<=5) ? 1 : 2;
-  var on=w.slice(0, w.length-f.k.length);
-  if(w.length<=4) return 1;                                   // short words are fair game
-  return ((on.length<=1 || SIMPLE.test(on)) && w.length<=5) ? 1 : 2;
-}
-ALL.forEach(function(G){ G.f.forEach(function(f){
-  f.w1=f.w.filter(function(w){ return wlvl(f,w)===1; });
-  f.w2=f.w.filter(function(w){ return wlvl(f,w)===2; });
-});});
-// grade 2 decks take every harder word first, then top up with review words
+ALL.forEach(function(G){ G.f.forEach(function(f){ f.w1=f.w; }); });
+function famOK(f){ return f.tier===tier; }
+function grpOK(G){ return G.tier===tier; }
+
 function deckWords(f,n){
-  var mkw=function(w){ return mk(f,w); };
-  if(grade===1) return shuffle(drawWeighted(f.w1.map(mkw),n));
-  var out=drawWeighted(f.w2.map(mkw),n);
-  if(out.length<n) out=out.concat(drawWeighted(f.w1.map(mkw),n-out.length));
-  return shuffle(out);
+  return shuffle(drawWeighted(f.w.map(function(w){ return mk(f,w); }),n));
 }
 function poolFor(G,n){
-  var hard=[], easy=[];
-  G.f.forEach(function(f){
-    if(grade===2) f.w2.forEach(function(w){ hard.push(mk(f,w)); });
-    f.w1.forEach(function(w){ easy.push(mk(f,w)); });
-  });
-  var out=drawWeighted(hard,n);
-  if(out.length<n) out=out.concat(drawWeighted(easy,n-out.length));
-  return shuffle(out);
+  var pool=[];
+  G.f.forEach(function(f){ f.w.forEach(function(w){ pool.push(mk(f,w)); }); });
+  return shuffle(drawWeighted(pool,n));
 }
-function famOK(f){ return (grade===2 || (ALL[f.gi].lvl===1 && f.w1.length>=3)); }
-function grpOK(G){ return grade===2 || G.lvl===1; }
+
 
 var store={
   get:function(k,d){try{var v=localStorage.getItem("wf_"+k);return v===null?d:JSON.parse(v);}catch(e){return d;}},
@@ -445,10 +445,11 @@ var E=function(id){return document.getElementById(id);};
 
 var ROUND=12;
 var mode="practice", screen="play";
-var grade=store.get("grade",1);
+var tier=store.get("tier",1);
 var fi=Math.min(store.get("fam",0),FAMS.length-1);
 var gi=store.get("grp",0);
 var deck=[], dpos=0, misses=0, score=store.get("score",0);
+if(!store.get("floor375",0)){ if(score<375) score=375; store.set("floor375",1); store.set("score",score); }
 var t0=0, ticker=null, advTimer=null;
 var pos=20;   // yards from his own goal line; the ball never goes below 20
 var famChips=[], grpChips=[];
@@ -469,14 +470,17 @@ function paintKinds(){
   paneStart.className = kind==="start"?"":"hide";
   paneSight.className = kind==="sight"?"":"hide";
 }
-E("sPick").appendChild(gradeRow("p")); E("sPick").appendChild(kindRow); E("sPick").appendChild(paneEnd); E("sPick").appendChild(paneStart); E("sPick").appendChild(paneSight);
+E("sPick").appendChild(tierRow()); E("sPick").appendChild(kindRow); E("sPick").appendChild(paneEnd); E("sPick").appendChild(paneStart); E("sPick").appendChild(paneSight);
 
 function fillPane(sets, pane){
   sets.forEach(function(G){
     var h=document.createElement("div"); h.className="grp"; h.textContent=G.g; pane.appendChild(h);
     var row=document.createElement("div"); row.className="chips";
     G.f.forEach(function(f){
-      var b=document.createElement("button"); b.className="fam"; b.textContent=f.lab;
+      var b=document.createElement("button"); b.className="fam"+(f.t==="mix"?" mix":"");
+      if(f.t==="big"||f.t==="mix"||f.tier===2&&f.t!=="sight"){
+        b.innerHTML='<span class="fp">'+(f.t==="big"?f.name:f.lab)+'</span><span class="fs">'+(f.sample||"")+'</span>';
+      } else { b.textContent=f.lab; }
       b.onclick=function(){ fi=f.idx; store.set("fam",fi); newPractice(); show("play"); };
       famChips[f.idx]=b; row.appendChild(b);
     });
@@ -485,16 +489,24 @@ function fillPane(sets, pane){
 }
 function fillPanes(){
   paneEnd.innerHTML=""; paneStart.innerHTML=""; paneSight.innerHTML=""; famChips=[];
-  fillPane(GROUPS.filter(grpOK),paneEnd);
-  fillPane(ONSETS.filter(grpOK),paneStart);
-  fillPane(SIGHT.filter(grpOK),paneSight);
+  kindRow.className=(tier===1)?"kinds":"kinds hide";
+  if(tier!==1){ kind="end"; }
+  if(tier===1){
+    fillPane(GROUPS.filter(grpOK),paneEnd);
+    fillPane(ONSETS.filter(grpOK),paneStart);
+    fillPane(SIGHT.filter(grpOK),paneSight);
+  } else if(tier===2){
+    fillPane(PATTERNS.concat(SIGHT.filter(grpOK)),paneEnd);
+  } else {
+    fillPane(BIGG,paneEnd);
+  }
   paintKinds();
 }
 fillPanes();
 
 function fillGroups(){
   E("sGroups").innerHTML=""; grpChips=[];
-  E("sGroups").appendChild(gradeRow("g"));
+  E("sGroups").appendChild(tierRow());
   ALL.forEach(function(G,i){
     if(!grpOK(G)) return;
     var b=document.createElement("button"); b.className="bigchip"; b.textContent=G.g;
@@ -503,28 +515,35 @@ function fillGroups(){
   });
 }
 
-function gradeRow(tag){
+function tierRow(){
+  var wrap=document.createElement("div");
   var row=document.createElement("div"); row.className="grades";
-  [[1,"1st grade","short words, one letter in front"],[2,"2nd grade","blends, r sounds, vowel teams"]].forEach(function(p){
+  [[1,"1st grade","sounds and word families"],[2,"2nd grade","patterns and silent e"]].forEach(function(p){
     var b=document.createElement("button"); b.className="grade";
     b.innerHTML='<span class="gbig">'+p[1]+'</span><span class="gsm">'+p[2]+'</span>';
-    b.dataset.g=p[0]; b.dataset.tag=tag;
-    b.onclick=function(){ setGrade(p[0]); };
+    b.dataset.t=p[0];
+    b.onclick=function(){ setTier(p[0]); };
     row.appendChild(b);
   });
-  return row;
+  var big=document.createElement("button"); big.className="grade big";
+  big.innerHTML='<span class="gbig">Big words</span><span class="gsm">long words, chunk by chunk</span>';
+  big.dataset.t=3;
+  big.onclick=function(){ setTier(3); };
+  wrap.appendChild(row); wrap.appendChild(big);
+  return wrap;
 }
-function paintGrades(){
+function paintTiers(){
   Array.prototype.forEach.call(document.querySelectorAll(".grade"),function(b){
-    b.className=(+b.dataset.g===grade)?"grade on":"grade";
+    var on=(+b.dataset.t===tier);
+    b.className=(b.dataset.t==="3"?"grade big":"grade")+(on?" on":"");
   });
 }
-function setGrade(g){
-  if(g===grade) return;
-  grade=g; store.set("grade",grade);
-  fillPanes(); fillGroups(); paintGrades();
+function setTier(n){
+  if(n===tier) return;
+  tier=n; store.set("tier",tier);
+  fillPanes(); fillGroups(); paintTiers();
   if(!famOK(FAMS[fi])){ for(var i=0;i<FAMS.length;i++){ if(famOK(FAMS[i])){ fi=i; break; } } store.set("fam",fi); }
-  if(!grpOK(ALL[gi])){ gi=0; store.set("grp",gi); }
+  if(!grpOK(ALL[gi])){ for(var j=0;j<ALL.length;j++){ if(grpOK(ALL[j])){ gi=j; break; } } store.set("grp",gi); }
   if(mode==="practice"){ newPractice(); } else { showReady(); }
   render();
 }
@@ -573,11 +592,21 @@ function render(){
   if(dpos>=deck.length) dpos=0;
   var c=deck[dpos];
   if(c){
-    E("word").innerHTML='<span class="on">'+c.w.slice(0,c.cut)+"</span>"+c.w.slice(c.cut);
+    var html="", i, at=0;
+    if(c.chunks){
+      for(i=0;i<c.chunks.length;i++){
+        if(i) html+='<span class="dot2">&middot;</span>';
+        html+=c.w.slice(at,at+c.chunks[i]); at+=c.chunks[i];
+      }
+    } else {
+      for(i=0;i<c.w.length;i++)
+        html += (c.mask.indexOf(i)>-1) ? '<span class="on">'+c.w.charAt(i)+"</span>" : c.w.charAt(i);
+    }
+    E("word").innerHTML=html;
   }
   famChips.forEach(function(b,i){ if(b) b.className=(i===fi)?"fam on":"fam"; });
   grpChips.forEach(function(b){ b.className=(+b.dataset.i===gi)?"bigchip on":"bigchip"; });
-  paintGrades();
+  paintTiers();
   var d=E("dots"); d.innerHTML="";
   deck.forEach(function(c,i){
     var el=document.createElement("div");
@@ -602,7 +631,7 @@ function advance(){
 function finish(){
   if(mode==="practice"){ newPractice(); return; }
   clearInterval(ticker);
-  var secs=(Date.now()-t0)/1000, key="best_"+gi+"_g"+grade, best=store.get(key,null);
+  var secs=(Date.now()-t0)/1000, key="best_"+gi+"_t"+tier, best=store.get(key,null);
   var perfect=(misses===0), record=false;
   if(perfect&&(best===null||secs<best)){ record=true; store.set(key,Math.round(secs*10)/10); }
   E("rBig").textContent=secs.toFixed(1)+"s";
@@ -630,7 +659,7 @@ function blast(n){
 
 function showReady(){
   E("rBig").textContent=ALL[gi].g;
-  var b=store.get("best_"+gi+"_g"+grade,null);
+  var b=store.get("best_"+gi+"_t"+tier,null);
   E("rNote").textContent=b===null?"read 12 words as fast as you can":"best so far: "+b.toFixed(1)+"s";
   E("goLabel").textContent="Start";
   render();
